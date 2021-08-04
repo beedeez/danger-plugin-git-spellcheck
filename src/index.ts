@@ -9,37 +9,53 @@ export declare function markdown(message: string): void
 import * as cspell from "cspell-lib"
 import { extname } from "path"
 
-interface FileTypo {
-  file: string
-  infoItems: cspell.TextInfoItem[]
+interface Typo {
+  line: number
+  col: number
+  text: string
 }
 
-async function checkFile(file: string): Promise<FileTypo> {
+interface FileInfo {
+  file: string
+  typos: Typo[]
+}
+
+async function checkFile(file: string): Promise<FileInfo> {
   const diff = await danger.git.diffForFile(file)
   if (!diff) {
-    return { file, infoItems: [] }
+    return { file, typos: [] }
   }
-  const source = diff.after
+  const sourceLines = diff.after.split("\n")
+  const addedLines = diff.added.split("\n").map(line => line.substring(1))
 
   const ext = extname(file)
   const languageIds = cspell.getLanguagesForExt(ext)
   const mergedSettings = cspell.mergeSettings(cspell.getDefaultSettings(), {
     source: { name: file, filename: file },
   })
-  const config = cspell.constructSettingsForText(mergedSettings, source, languageIds)
-
-  return {
-    file,
-    infoItems: await cspell.checkText(source, config).then(info => {
-      return info.items.filter(i => i.isError)
-    }),
-  }
+  const lineTypos = await Promise.all(
+    addedLines.map(async line => {
+      const config = cspell.constructSettingsForText(mergedSettings, line, languageIds)
+      const info = await cspell.checkText(line, config)
+      const items = info.items.filter(item => item.isError)
+      return items.map(
+        item =>
+          ({
+            line: sourceLines.indexOf(line),
+            col: item.startPos,
+            text: item.text,
+          } as Typo)
+      )
+    })
+  )
+  const typos = lineTypos.flat()
+  return { file, typos }
 }
 
-function describeTypo(typo: FileTypo): string {
+function describeInfo(info: FileInfo): string {
   return (
-    `Typos in ${typo.file}\n|Position|Word|\n|-|-|\n` +
-    typo.infoItems.map(infoItem => `|${infoItem.startPos}|${infoItem.text}|`).join("\n")
+    `Typos in ${info.file}\n|Position (Line:Col)|Word|\n|-|-|\n` +
+    info.typos.map(typo => `|${typo.line}:${typo.col}|${typo.text}|`).join("\n")
   )
 }
 
@@ -48,10 +64,10 @@ function describeTypo(typo: FileTypo): string {
  */
 export async function gitSpellcheck() {
   const files = [...danger.git.modified_files, ...danger.git.created_files]
-  const typos = await Promise.all(files.map(checkFile))
-  const nonemptyTypos = typos.filter(typo => typo.infoItems.length > 0)
-  if (nonemptyTypos.length > 0) {
-    const typoDescription = nonemptyTypos.map(describeTypo).join("\n")
+  const fileInfos = await Promise.all(files.map(checkFile))
+  const fileInfosWithTypo = fileInfos.filter(info => info.typos.length > 0)
+  if (fileInfosWithTypo.length > 0) {
+    const typoDescription = fileInfosWithTypo.map(describeInfo).join("\n")
 
     warn("😡 There seems to be some typos")
     markdown(typoDescription)
