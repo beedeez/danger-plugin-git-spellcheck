@@ -49,9 +49,11 @@ function describeTypo(typo: FileTypo): string {
 export async function gitSpellcheck() {
   const files = [...danger.git.modified_files, ...danger.git.created_files]
   const typos = await Promise.all(files.map(checkFile))
-  const msg = typos
-    .filter(typo => typo.infoItems.length > 0)
-    .map(describeTypo)
-    .join("\n")
-  warn(msg)
+  const nonemptyTypos = typos.filter(typo => typo.infoItems.length > 0)
+  if (nonemptyTypos.length > 0) {
+    const typoDescription = nonemptyTypos.map(describeTypo).join("\n")
+
+    warn("😡 There seems to be some typos")
+    markdown(typoDescription)
+  }
 }
