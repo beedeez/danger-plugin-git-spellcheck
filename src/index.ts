@@ -7,6 +7,7 @@ export declare function fail(message: string): void
 export declare function markdown(message: string): void
 
 import * as cspell from "cspell-lib"
+import { readFileSync } from "fs"
 import { extname } from "path"
 
 interface Typo {
@@ -20,7 +21,19 @@ interface FileInfo {
   typos: Typo[]
 }
 
-async function checkFile(file: string): Promise<FileInfo> {
+const settingsFile = "cspell.json"
+
+async function getSettings(): Promise<cspell.CSpellSettings> {
+  try {
+    const fileContent = readFileSync(settingsFile, "utf-8")
+    const fileSettings = JSON.parse(fileContent) as cspell.FileSettings
+    return cspell.mergeSettings(cspell.getDefaultSettings(), fileSettings)
+  } catch {
+    return cspell.getDefaultSettings()
+  }
+}
+
+async function checkFile(file: string, settings: cspell.FileSettings): Promise<FileInfo> {
   const diff = await danger.git.diffForFile(file)
   if (!diff) {
     return { file, typos: [] }
@@ -30,13 +43,13 @@ async function checkFile(file: string): Promise<FileInfo> {
 
   const ext = extname(file)
   const languageIds = cspell.getLanguagesForExt(ext)
-  const mergedSettings = cspell.mergeSettings(cspell.getDefaultSettings(), {
+  const mergedSettings = cspell.mergeSettings(settings, {
     source: { name: file, filename: file },
   })
   const lineTypos = await Promise.all(
     addedLines.map(async line => {
-      const config = cspell.constructSettingsForText(mergedSettings, line, languageIds)
-      const info = await cspell.checkText(line, config)
+      const lineSettings = cspell.constructSettingsForText(mergedSettings, line, languageIds)
+      const info = await cspell.checkText(line, lineSettings)
       const items = info.items.filter(item => item.isError)
       return items.map(
         item =>
@@ -63,8 +76,10 @@ function describeInfo(info: FileInfo): string {
  * This plugin checks the spelling in code and reports any error as markdown PR comment.
  */
 export async function gitSpellcheck() {
+  const settings = await getSettings()
+
   const files = [...danger.git.modified_files, ...danger.git.created_files]
-  const fileInfos = await Promise.all(files.map(checkFile))
+  const fileInfos = await Promise.all(files.map(file => checkFile(file, settings)))
   const fileInfosWithTypo = fileInfos.filter(info => info.typos.length > 0)
   if (fileInfosWithTypo.length > 0) {
     const typoDescription = fileInfosWithTypo.map(describeInfo).join("\n")
