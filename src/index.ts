@@ -66,10 +66,10 @@ async function checkFile(file: string, settings: cspell.FileSettings): Promise<F
 }
 
 function describeInfo(info: FileInfo): string {
-  return (
-    `### Typos in ${info.file}\n\n| Position (Line:Col) | Word |\n| --- | --- |\n` +
-    info.typos.map(typo => `| ${typo.line}:${typo.col} | ${typo.text} |`).join("\n")
-  )
+  return `### Typos in ${info.file}
+| Position (Line:Col) | Word |
+| --- | --- |
+${info.typos.map(typo => `| ${typo.line}:${typo.col} | ${typo.text} |`).join("\n")}`
 }
 
 /**
@@ -82,7 +82,7 @@ export async function gitSpellcheck() {
   const fileInfos = await Promise.all(files.map(file => checkFile(file, settings)))
   const fileInfosWithTypo = fileInfos.filter(info => info.typos.length > 0)
   if (fileInfosWithTypo.length > 0) {
-    const typoDescription = fileInfosWithTypo.map(describeInfo).join("\n")
+    const typoDescription = fileInfosWithTypo.map(describeInfo).join("\n\n")
 
     warn("😡 There seems to be some typos")
     markdown(typoDescription)
