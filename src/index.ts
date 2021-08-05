@@ -67,7 +67,7 @@ async function checkFile(file: string, settings: cspell.FileSettings): Promise<F
 
 function describeInfo(info: FileInfo): string {
   return (
-    `Typos in ${info.file}\n| Position (Line:Col) | Word |\n| --- | --- |\n` +
+    `### Typos in ${info.file}\n\n| Position (Line:Col) | Word |\n| --- | --- |\n` +
     info.typos.map(typo => `| ${typo.line}:${typo.col} | ${typo.text} |`).join("\n")
   )
 }
