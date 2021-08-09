@@ -27,7 +27,7 @@ Configuration:
 
 This plugin use the [cspell](https://github.com/streetsidesoftware/cspell) library under the hood to perform spellchecking, which can be configured using a `cspell.json` configuration file. Please see [here](https://www.npmjs.com/package/cspell) for more details on cspell configuration.
 
-```json
+```js
 // cSpell Settings
 {
   // Version of the setting file.  Always 0.1
