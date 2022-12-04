@@ -7,11 +7,20 @@
     "allowJs": false,
     "pretty": true,
     "strictNullChecks": true,
-    "esModuleInterop": true,
     "declaration": true,
     "skipLibCheck": true,
-    "lib": ["ES2019"],
+    "lib": [
+      "ES2019"
+    ],
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx"],
-  "exclude": ["dangerfile.ts", "node_modules", "dist"]
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "dangerfile.ts"
+  ],
+  "exclude": [
+    "dangerfile.ts",
+    "node_modules",
+    "dist"
+  ]
 }

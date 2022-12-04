@@ -8,7 +8,7 @@ export declare function markdown(message: string): void
 
 import * as cspell from "cspell-lib"
 import { readFileSync } from "fs"
-import micromatch from "micromatch"
+import * as micromatch from "micromatch"
 import { extname } from "path"
 interface Typo {
   line: number
@@ -102,7 +102,7 @@ export async function gitSpellcheck({ patterns = [], ignore = [] }: Params = {})
   if (fileInfosWithTypo.length > 0) {
     const typoDescription = fileInfosWithTypo.map(describeInfo).join("\n\n")
 
-    warn("😡 There seems to be some typos;")
+    warn("😡 There seems to be some typos")
     markdown(typoDescription)
   }
 }
