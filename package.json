@@ -30,6 +30,7 @@
     "predocs": "rm -rf docs/",
     "docs": "esdoc -c .esdoc.json",
     "prepublish": "npm run build",
+    "prepare": "yarn build",
     "semantic-release": "semantic-release pre && npm publish && semantic-release post",
     "prettier": "prettier",
     "prettier-write": "npm run prettier -- --parser typescript --no-semi --trailing-comma es5 --write --print-width 120",
