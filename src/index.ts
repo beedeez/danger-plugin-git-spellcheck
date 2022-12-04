@@ -8,8 +8,8 @@ export declare function markdown(message: string): void
 
 import * as cspell from "cspell-lib"
 import { readFileSync } from "fs"
+import micromatch from "micromatch"
 import { extname } from "path"
-
 interface Typo {
   line: number
   col: number
@@ -72,19 +72,37 @@ function describeInfo(info: FileInfo): string {
   )
 }
 
+interface Params {
+  patterns?: string | ReadonlyArray<string>
+  ignore?: string | ReadonlyArray<string>
+}
+
 /**
  * This plugin checks the spelling in code and reports any error as markdown PR comment.
  */
-export async function gitSpellcheck() {
+export async function gitSpellcheck({ patterns = [], ignore = [] }: Params = {}) {
   const settings = await getSettings()
 
   const files = [...danger.git.modified_files, ...danger.git.created_files]
-  const fileInfos = await Promise.all(files.map(file => checkFile(file, settings)))
+
+  let filteredFiles
+
+  if (ignore.length) {
+    filteredFiles = micromatch.not(files, ignore)
+  }
+
+  if (patterns.length) {
+    filteredFiles = micromatch(filteredFiles || files, patterns)
+  }
+
+  const fileInfos = await Promise.all((filteredFiles || files).map(file => checkFile(file, settings)))
+
   const fileInfosWithTypo = fileInfos.filter(info => info.typos.length > 0)
+
   if (fileInfosWithTypo.length > 0) {
     const typoDescription = fileInfosWithTypo.map(describeInfo).join("\n\n")
 
-    warn("😡 There seems to be some typos")
+    warn("😡 There seems to be some typos;")
     markdown(typoDescription)
   }
 }
