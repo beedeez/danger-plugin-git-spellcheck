@@ -102,7 +102,7 @@ export async function gitSpellcheck({ patterns = [], ignore = [] }: Params = {})
   if (fileInfosWithTypo.length > 0) {
     const typoDescription = fileInfosWithTypo.map(describeInfo).join("\n\n")
 
-    warn("😡 There seems to be some typos")
+    warn(":eyes: There seems to be some typos")
     markdown(typoDescription)
   }
 }
