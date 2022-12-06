@@ -17,12 +17,6 @@
       "check-constructor"
     ],
     "object-literal-sort-keys": false,
-    "semicolon": [
-      true,
-      "never",
-      "ignore-interfaces",
-      "ignore-bound-class-methods"
-    ],
     "switch-default": false,
     "trailing-comma": [
       true,
