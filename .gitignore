@@ -64,6 +64,6 @@ typings/
 dist/
 
 ### VisualStudioCode ###
-.vscode/*
+.vscode
 
 # End of https://www.gitignore.io/api/node,visualstudiocode
