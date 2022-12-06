@@ -95,6 +95,6 @@
     "printWidth": 120
   },
   "dependencies": {
-    "cspell-lib": "^5.6.6"
+    "cspell-lib": "^6.17.0"
   }
 }
