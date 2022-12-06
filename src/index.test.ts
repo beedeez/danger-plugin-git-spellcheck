@@ -48,7 +48,7 @@ describe("gitSpellcheck()", () => {
       after: "Correct\nCorrect\nCorrect Incorrect\nIncorrect",
       added: "+Correct\n+Correct\n+Correct Incorrect\n+Incorrect",
     }
-    expectedWarning = "😡 There seems to be some typos"
+    expectedWarning = ":eyes: There seems to be some typos"
     expectedMarkdown = `Typos in modified.ts
 
 | Position (Line:Col) | Word |
