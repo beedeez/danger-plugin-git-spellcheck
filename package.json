@@ -42,7 +42,7 @@
     "node": ">=4.0.0"
   },
   "devDependencies": {
-    "@types/jest": "^19.2.4",
+    "@types/jest": "^29.2.4",
     "commitizen": "^2.9.6",
     "cz-conventional-changelog": "^2.0.0",
     "danger": "*",
@@ -80,7 +80,7 @@
       "js"
     ],
     "transform": {
-      ".(ts|tsx)": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+      ".(ts|tsx)": "ts-jest"
     },
     "testRegex": "(.test)\\.(ts|tsx)$",
     "testPathIgnorePatterns": [
